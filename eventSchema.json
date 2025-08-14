@@ -1,78 +1,72 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://example.com/schemas/transaction-event.schema.json",
   "title": "Bank-Transaction Event",
-  "description": "Canonical log record ingested by the Shadow Risk-Scoring service.",
   "type": "object",
   "additionalProperties": false,
-
   "properties": {
-    "event_id":      { "type": "string",  "description": "ULID/UUID v4, immutable" },
-    "event_time":    { "type": "string",  "format": "date-time", "description": "ISO-8601 in UTC" },
-    "event_type":    { "type": "string",  "enum": ["transaction"], "default": "transaction" },
-    "schema_version":{ "type": "string",  "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$" },
-
+    "event_id": { "type": "string" },
+    "event_time": { "type": "string", "format": "date-time" },
+    "event_type": { "type": "string", "enum": ["transaction"], "default": "transaction" },
+    "schema_version": { "type": "string", "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$" },
+    "transaction": {
       "type": "object",
       "additionalProperties": false,
       "properties": {
         "transaction_id": { "type": "string" },
-        "account_id":     { "type": "string", "description": "Internal customer/account identifier (hashed or tokenised)" },
-        "timestamp":      { "type": "string", "format": "date-time" },
-        "amount":         { "type": "number", "minimum": 0 },
-        "currency":       { "type": "string", "pattern": "^[A-Z]{3}$" },
+        "account_id": { "type": "string" },
+        "timestamp": { "type": "string", "format": "date-time" },
+        "amount": { "type": "number", "minimum": 0 },
+        "currency": { "type": "string", "pattern": "^[A-Z]{3}$" },
         "merchant": {
           "type": "object",
           "additionalProperties": false,
           "properties": {
-            "mcc":        { "type": "string", "pattern": "^[0-9]{4}$" },
-            "merchant_id":{ "type": "string" },
-            "name":       { "type": "string" }
+            "mcc": { "type": "string", "pattern": "^[0-9]{4}$" },
+            "merchant_id": { "type": "string" },
+            "name": { "type": "string" }
           },
           "required": ["mcc"]
         },
-        "channel":       { "type": "string", "enum": ["ecom", "pos", "atm", "mobile", "web"] },
-        "status":        { "type": "string", "enum": ["authorised", "declined", "reversed", "pending"] }
+        "channel": { "type": "string", "enum": ["ecom", "pos", "atm", "mobile", "web"] },
+        "status": { "type": "string", "enum": ["authorised", "declined", "reversed", "pending"] }
       },
       "required": ["transaction_id", "account_id", "timestamp", "amount", "currency", "status"]
     },
-
     "device": {
+      "type": "object",
       "additionalProperties": false,
       "properties": {
-        "device_id":    { "type": "string" },
-        "ip_address":   { "type": "string", "format": "ipv4" },
-        "user_agent":   { "type": "string" },
-        "fingerprint":  { "type": "string", "description": "Browser/device fingerprint hash" }
+        "device_id": { "type": "string" },
+        "ip_address": { "type": "string", "format": "ipv4" },
+        "user_agent": { "type": "string" },
+        "fingerprint": { "type": "string" }
       }
     },
-
     "location": {
       "type": "object",
       "properties": {
-        "lat":         { "type": "number", "minimum": -90, "maximum": 90 },
-        "lon":         { "type": "number", "minimum": -180, "maximum": 180 },
+        "lat": { "type": "number", "minimum": -90, "maximum": 90 },
+        "lon": { "type": "number", "minimum": -180, "maximum": 180 },
         "country_iso": { "type": "string", "pattern": "^[A-Z]{2}$" },
-        "region":      { "type": "string" },
-        "city":        { "type": "string" }
+        "region": { "type": "string" },
+        "city": { "type": "string" }
       }
     },
-
     "features": {
       "type": "object",
       "additionalProperties": false,
-        "is_high_risk_country":   { "type": "boolean" },
-        "minutes_since_last_tx":  { "type": "integer", "minimum": 0 },
-        "velocity_score":         { "type": "number",  "minimum": 0, "maximum": 1 },
-        "historical_avg_amount":  { "type": "number",  "minimum": 0 }
+      "properties": {
+        "is_high_risk_country": { "type": "boolean" },
+        "minutes_since_last_tx": { "type": "integer", "minimum": 0 },
+        "velocity_score": { "type": "number", "minimum": 0, "maximum": 1 },
+        "historical_avg_amount": { "type": "number", "minimum": 0 }
       }
     },
-
-    
-    "pii_redacted":  { "type": "boolean", "default": false },
+    "pii_redacted": { "type": "boolean", "default": false },
     "consent_flags": {
       "type": "array",
       "items": { "type": "string" }
+    }
   },
-
   "required": ["event_id", "event_time", "transaction"]
 }
