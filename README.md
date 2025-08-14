@@ -16,7 +16,7 @@ pytest
 
 ## Security checks
 
-Run the same security scanners locally before committing changes:
+Run the same security scanners locally:
 
 ```bash
 pip install pip-audit
