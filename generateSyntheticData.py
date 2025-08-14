@@ -1,5 +1,5 @@
 # tools/generate_synthetic_events.py
-import json, random, uuid, datetime as dt
+import json, random, uuid, datetime as dt, hashlib
 from faker import Faker
 from ulid import ULID
 
@@ -34,7 +34,7 @@ def make_event():
             "device_id": fake.uuid4(),
             "ip_address": fake.ipv4_public(),
             "user_agent": fake.user_agent(),
-            "fingerprint": fake.md5()
+            "fingerprint": hashlib.sha256(fake.uuid4().encode()).hexdigest()
         },
         "location": {
             "lat": fake.latitude(),
