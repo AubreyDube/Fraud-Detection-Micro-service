@@ -12,6 +12,7 @@
     "event_type":    { "type": "string",  "enum": ["transaction"], "default": "transaction" },
     "schema_version":{ "type": "string",  "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$" },
 
+    "transaction": {
       "type": "object",
       "additionalProperties": false,
       "properties": {
@@ -37,6 +38,7 @@
     },
 
     "device": {
+      "type": "object",
       "additionalProperties": false,
       "properties": {
         "device_id":    { "type": "string" },
@@ -48,6 +50,7 @@
 
     "location": {
       "type": "object",
+      "additionalProperties": false,
       "properties": {
         "lat":         { "type": "number", "minimum": -90, "maximum": 90 },
         "lon":         { "type": "number", "minimum": -180, "maximum": 180 },
@@ -59,19 +62,15 @@
 
     "features": {
       "type": "object",
-      "additionalProperties": false,
-        "is_high_risk_country":   { "type": "boolean" },
-        "minutes_since_last_tx":  { "type": "integer", "minimum": 0 },
-        "velocity_score":         { "type": "number",  "minimum": 0, "maximum": 1 },
-        "historical_avg_amount":  { "type": "number",  "minimum": 0 }
-      }
+      "description": "Derived features for risk assessment. Specific feature names are intentionally omitted.",
+      "additionalProperties": { "type": ["number", "string", "boolean"] }
     },
 
-    
     "pii_redacted":  { "type": "boolean", "default": false },
     "consent_flags": {
       "type": "array",
       "items": { "type": "string" }
+    }
   },
 
   "required": ["event_id", "event_time", "transaction"]

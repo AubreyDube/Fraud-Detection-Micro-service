@@ -1,11 +1,8 @@
 from pathlib import Path
-import json, jsonschema, pytest
+import json
+from jsonschema import Draft202012Validator
 
 SCHEMA = json.loads(Path("eventSchema.json").read_text())
 
-@pytest.fixture()
-def example():
-    return json.loads(Path("eventSchema.json").read_text())
-
-def test_valid_event(example):
-    jsonschema.validate(example, SCHEMA)
+def test_schema_is_valid():
+    Draft202012Validator.check_schema(SCHEMA)
