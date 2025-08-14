@@ -1,0 +1,15 @@
+{
+  "event_type": {
+    "type": "string",
+    "enum": ["transaction"],
+    "default": "transaction"
+  },
+  "transaction_channel": {
+    "type": "string",
+    "enum": ["ecom", "pos", "atm", "mobile", "web"]
+  },
+  "transaction_status": {
+    "type": "string",
+    "enum": ["authorised", "declined", "reversed", "pending"]
+  }
+}
