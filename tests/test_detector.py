@@ -9,6 +9,7 @@ import pytest
 
 sys.path.append(str(pathlib.Path(__file__).resolve().parents[1]))
 
+import fraud_detector
 from fraud_detector import evaluate_transaction
 
 def _base_event(**overrides):
@@ -37,6 +38,8 @@ def test_high_amount_flagged():
     decision = evaluate_transaction(event)
     assert decision["fraud"]
     assert "amount_gt_1000" in decision["reasons"]
+    expected = len(decision["reasons"]) / len(fraud_detector._RULES)
+    assert decision["score"] == pytest.approx(expected)
 
 def test_clean_transaction_passes():
     event = _base_event()
@@ -49,6 +52,17 @@ def test_invalid_event_raises():
     event.pop("transaction")
     with pytest.raises(jsonschema.ValidationError):
         evaluate_transaction(event)
+
+
+def test_multiple_flags_scaled_score():
+    event = _base_event(
+        transaction={"amount": 2000},
+        features={"velocity_score": 0.9, "is_high_risk_country": False},
+    )
+    decision = evaluate_transaction(event)
+    assert len(decision["reasons"]) == 2
+    expected = len(decision["reasons"]) / len(fraud_detector._RULES)
+    assert decision["score"] == pytest.approx(expected)
 
 
 def test_valid_correlation_id_used(caplog):
