@@ -1,0 +1,40 @@
+{
+  "event_id": "123e4567-e89b-12d3-a456-426614174000",
+  "event_time": "2024-01-01T12:00:00Z",
+  "event_type": "transaction",
+  "schema_version": "1.0.0",
+  "transaction": {
+    "transaction_id": "tx-1",
+    "account_id": "acc-1",
+    "timestamp": "2024-01-01T12:00:00Z",
+    "amount": 100.0,
+    "currency": "USD",
+    "merchant": {
+      "mcc": "1234",
+      "merchant_id": "m-1",
+      "name": "Test Merchant"
+    },
+    "channel": "web",
+    "status": "authorised"
+  },
+  "device": {
+    "device_id": "dev-1",
+    "ip_address": "192.168.0.1",
+    "user_agent": "Mozilla/5.0"
+  },
+  "location": {
+    "lat": 40.7128,
+    "lon": -74.0060,
+    "country_iso": "US",
+    "region": "NY",
+    "city": "New York"
+  },
+  "features": {
+    "is_high_risk_country": false,
+    "minutes_since_last_tx": 10,
+    "velocity_score": 0.1,
+    "historical_avg_amount": 50.0
+  },
+  "pii_redacted": false,
+  "consent_flags": ["test"]
+}
