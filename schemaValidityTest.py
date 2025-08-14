@@ -17,3 +17,19 @@ def test_valid_events(event):
 def test_invalid_events(event):
     with pytest.raises(jsonschema.ValidationError):
         jsonschema.validate(instance=event, schema=SCHEMA)
+
+
+@pytest.mark.parametrize("path", [
+    ("unexpected",),
+    ("device", "unexpected"),
+    ("location", "unexpected"),
+])
+def test_unexpected_fields(path):
+    event = _load_events("valid*.json")[0]
+    event = json.loads(json.dumps(event))
+    target = event
+    for key in path[:-1]:
+        target = target[key]
+    target[path[-1]] = "extra"
+    with pytest.raises(jsonschema.ValidationError):
+        jsonschema.validate(instance=event, schema=SCHEMA)
