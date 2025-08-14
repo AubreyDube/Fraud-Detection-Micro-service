@@ -1,5 +1,8 @@
 import sys
 import pathlib
+import json
+import logging
+import uuid
 
 import jsonschema
 import pytest
@@ -46,3 +49,22 @@ def test_invalid_event_raises():
     event.pop("transaction")
     with pytest.raises(jsonschema.ValidationError):
         evaluate_transaction(event)
+
+
+def test_valid_correlation_id_used(caplog):
+    event = _base_event()
+    cid = str(uuid.uuid4())
+    with caplog.at_level(logging.INFO, logger="fraud_detector"):
+        evaluate_transaction(event, correlation_id=cid)
+    record = caplog.records[-1]
+    assert json.loads(record.message)["correlation_id"] == cid
+
+
+def test_invalid_correlation_id_replaced(caplog, monkeypatch):
+    event = _base_event()
+    new_cid = "00000000-0000-0000-0000-000000000001"
+    monkeypatch.setattr("fraud_detector.uuid.uuid4", lambda: uuid.UUID(new_cid))
+    with caplog.at_level(logging.INFO, logger="fraud_detector"):
+        evaluate_transaction(event, correlation_id="not-a-uuid")
+    record = caplog.records[-1]
+    assert json.loads(record.message)["correlation_id"] == new_cid

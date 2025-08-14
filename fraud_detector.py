@@ -25,9 +25,16 @@ def evaluate_transaction(event: Dict[str, Any], correlation_id: str | None = Non
     Parameters
     ----------
     event: mapping conforming to the event schema
-    correlation_id: optional ID used to correlate logs across services
+    correlation_id: optional UUID used to correlate logs across services. If
+        omitted or invalid, a new UUID4 will be generated.
     """
-    correlation_id = correlation_id or str(uuid.uuid4())
+    if correlation_id:
+        try:
+            uuid.UUID(correlation_id)
+        except (ValueError, AttributeError, TypeError):
+            correlation_id = str(uuid.uuid4())
+    else:
+        correlation_id = str(uuid.uuid4())
     try:
         jsonschema.validate(event, _EVENT_SCHEMA)
     except jsonschema.ValidationError as err:
