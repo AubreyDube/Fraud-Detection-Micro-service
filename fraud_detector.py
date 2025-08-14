@@ -1,13 +1,19 @@
 import json
 import logging
 import uuid
+from pathlib import Path
 from typing import Dict, Any
+
+import jsonschema
 
 logger = logging.getLogger("fraud_detector")
 _handler = logging.StreamHandler()
 _handler.setFormatter(logging.Formatter('%(message)s'))
 logger.addHandler(_handler)
 logger.setLevel(logging.INFO)
+
+with open(Path(__file__).with_name("eventSchema.json")) as _f:
+    _EVENT_SCHEMA = json.load(_f)
 
 def _log(entry: Dict[str, Any], correlation_id: str) -> None:
     log_record = {"correlation_id": correlation_id, **entry}
@@ -22,6 +28,12 @@ def evaluate_transaction(event: Dict[str, Any], correlation_id: str | None = Non
     correlation_id: optional ID used to correlate logs across services
     """
     correlation_id = correlation_id or str(uuid.uuid4())
+    try:
+        jsonschema.validate(event, _EVENT_SCHEMA)
+    except jsonschema.ValidationError as err:
+        _log({"event_id": event.get("event_id"), "error": err.message}, correlation_id)
+        raise
+
     reasons = []
     tx = event.get("transaction", {})
     features = event.get("features", {})
