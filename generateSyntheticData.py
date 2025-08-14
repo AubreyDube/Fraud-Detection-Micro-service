@@ -1,7 +1,7 @@
 # tools/generate_synthetic_events.py
 import json, random, uuid, datetime as dt
 from faker import Faker
-from ulid import ULID
+import ulid
 
 fake = Faker()
 CURRENCIES = ["ZAR", "USD", "GBP"]
@@ -12,7 +12,7 @@ def make_event():
     now = dt.datetime.utcnow().replace(microsecond=0)
     amt = round(random.uniform(10, 5000), 2)
     return {
-        "event_id": str(ULID()),
+        "event_id": str(ulid.new()),
         "event_time": now.isoformat() + "Z",
         "event_type": "transaction",
         "schema_version": "1.0.0",
@@ -37,8 +37,8 @@ def make_event():
             "fingerprint": fake.md5()
         },
         "location": {
-            "lat": fake.latitude(),
-            "lon": fake.longitude(),
+            "lat": float(fake.latitude()),
+            "lon": float(fake.longitude()),
             "country_iso": "ZA",
             "region": "Gauteng",
             "city": "Johannesburg"
