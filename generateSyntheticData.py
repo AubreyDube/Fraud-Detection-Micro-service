@@ -1,16 +1,18 @@
 # tools/generate_synthetic_events.py
-import json, random, uuid, datetime as dt, hashlib
+import json, uuid, datetime as dt, hashlib
+from random import SystemRandom
 from faker import Faker
 from ulid import ULID
 
 fake = Faker()
+rand = SystemRandom()
 CURRENCIES = ["ZAR", "USD", "GBP"]
 CHANNELS   = ["mobile", "web", "ecom", "pos"]
 STATUS     = ["authorised", "declined", "reversed", "pending"]
 
 def make_event():
     now = dt.datetime.utcnow().replace(microsecond=0)
-    amt = round(random.uniform(10, 5000), 2)
+    amt = round(rand.uniform(10, 5000), 2)
     return {
         "event_id": str(ULID()),
         "event_time": now.isoformat() + "Z",
@@ -21,14 +23,14 @@ def make_event():
             "account_id": fake.uuid4(),
             "timestamp": now.isoformat() + "Z",
             "amount": amt,
-            "currency": random.choice(CURRENCIES),
+            "currency": rand.choice(CURRENCIES),
             "merchant": {
-                "mcc": f"{random.randint(4000, 5999)}",
+                "mcc": f"{rand.randint(4000, 5999)}",
                 "merchant_id": fake.uuid4(),
                 "name": fake.company()
             },
-            "channel": random.choice(CHANNELS),
-            "status": random.choice(STATUS)
+            "channel": rand.choice(CHANNELS),
+            "status": rand.choice(STATUS)
         },
         "device": {
             "device_id": fake.uuid4(),
@@ -45,9 +47,9 @@ def make_event():
         },
         "features": {
             "is_high_risk_country": False,
-            "minutes_since_last_tx": random.randint(1, 60),
-            "velocity_score": round(random.random(), 2),
-            "historical_avg_amount": round(amt * random.uniform(0.6, 1.4), 2)
+            "minutes_since_last_tx": rand.randint(1, 60),
+            "velocity_score": round(rand.random(), 2),
+            "historical_avg_amount": round(amt * rand.uniform(0.6, 1.4), 2)
         },
         "pii_redacted": True,
         "consent_flags": ["fraud_scoring_v1"]
