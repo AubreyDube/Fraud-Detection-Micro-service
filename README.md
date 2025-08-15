@@ -8,6 +8,11 @@ A minimal rule-based detector is available in the `fraud_detector` package. The
 `evaluate_transaction` function returns a structured decision and emits JSON
 logs with a correlation ID to aid tracing.
 
+Rules are registered in a central registry so each can be tested in isolation.
+Additional rule modules can be loaded by setting the `FRAUD_RULE_MODULES`
+environment variable to a comma-separated list of module paths. Each module
+should register rules using the provided decorator.
+
 ### Logging
 
 The module uses a logger named `fraud_detector` that outputs one JSON record per
