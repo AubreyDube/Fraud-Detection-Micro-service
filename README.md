@@ -4,14 +4,14 @@ Work in progress
 
 ## Fraud detector
 
-A minimal rule-based detector is available in `fraud_detector.py`. The `evaluate_transaction`
-function returns a structured decision and emits JSON logs with a correlation ID to aid
-tracing.
+A minimal rule-based detector is available in the `fraud_detector` package. The
+`evaluate_transaction` function returns a structured decision and emits JSON logs with a
+correlation ID to aid tracing.
 
 ## Run tests
 
 ```bash
-pytest
+python -m pytest
 ```
 
 ## Security checks
