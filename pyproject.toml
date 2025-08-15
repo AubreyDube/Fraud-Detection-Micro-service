@@ -1,0 +1,18 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "fraud_detector"
+version = "0.1.0"
+dependencies = [
+    "Faker",
+    "ulid-py",
+    "jsonschema"
+]
+
+[project.scripts]
+generate-synthetic-events = "tools.generate_synthetic_data:main"
+
+[tool.setuptools.packages.find]
+include = ["fraud_detector", "tools"]
