@@ -9,9 +9,16 @@ import json
 import logging
 import uuid
 from pathlib import Path
-from typing import Dict, Any, Callable, Tuple, List
+from typing import Dict, Any
 
 import jsonschema
+
+from .rule_registry import rules_registry
+# Ensure built-in rules are registered
+from . import rules as _builtin_rules  # noqa: F401
+
+# Load additional rule modules from environment if configured
+rules_registry.load_from_env()
 
 logger = logging.getLogger("fraud_detector")
 
@@ -50,14 +57,6 @@ configure_logging()
 with open(Path(__file__).with_name("eventSchema.json")) as _f:
     _EVENT_SCHEMA = json.load(_f)
 
-Rule = Tuple[str, Callable[[Dict[str, Any], Dict[str, Any]], bool]]
-_RULES: List[Rule] = [
-    ("amount_gt_1000", lambda tx, feats: tx.get("amount", 0) > 1000),
-    ("velocity_score_high", lambda tx, feats: feats.get("velocity_score", 0) > 0.8),
-    ("high_risk_country", lambda tx, feats: feats.get("is_high_risk_country")),
-]
-_TOTAL_RULES = len(_RULES)
-
 
 def _log(entry: Dict[str, Any], correlation_id: str) -> None:
     log_record = {"correlation_id": correlation_id, **entry}
@@ -88,10 +87,10 @@ def evaluate_transaction(event: Dict[str, Any], correlation_id: str | None = Non
 
     tx = event.get("transaction", {})
     features = event.get("features", {})
-    reasons = [name for name, rule in _RULES if rule(tx, features)]
+    reasons = [name for name, rule in rules_registry if rule(tx, features)]
 
     is_fraud = bool(reasons)
-    score = min(1.0, len(reasons) / _TOTAL_RULES)
+    score = min(1.0, len(reasons) / len(rules_registry))
     decision = {"fraud": is_fraud, "score": score, "reasons": reasons}
 
     _log({"event_id": event.get("event_id"), "decision": decision}, correlation_id)

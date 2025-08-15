@@ -1,10 +1,13 @@
 import json
 import logging
 import uuid
+import pathlib
+import sys
 
 import jsonschema
 import pytest
 
+sys.path.append(str(pathlib.Path(__file__).resolve().parents[1]))
 import fraud_detector
 from fraud_detector import evaluate_transaction, configure_logging
 
@@ -34,7 +37,7 @@ def test_high_amount_flagged():
     decision = evaluate_transaction(event)
     assert decision["fraud"]
     assert "amount_gt_1000" in decision["reasons"]
-    expected = len(decision["reasons"]) / len(fraud_detector._RULES)
+    expected = len(decision["reasons"]) / len(fraud_detector.rules_registry)
     assert decision["score"] == pytest.approx(expected)
 
 def test_clean_transaction_passes():
@@ -57,7 +60,7 @@ def test_multiple_flags_scaled_score():
     )
     decision = evaluate_transaction(event)
     assert len(decision["reasons"]) == 2
-    expected = len(decision["reasons"]) / len(fraud_detector._RULES)
+    expected = len(decision["reasons"]) / len(fraud_detector.rules_registry)
     assert decision["score"] == pytest.approx(expected)
 
 
