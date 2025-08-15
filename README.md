@@ -5,8 +5,16 @@ Work in progress
 ## Fraud detector
 
 A minimal rule-based detector is available in the `fraud_detector` package. The
-`evaluate_transaction` function returns a structured decision and emits JSON logs with a
-correlation ID to aid tracing.
+`evaluate_transaction` function returns a structured decision and emits JSON
+logs with a correlation ID to aid tracing.
+
+### Logging
+
+The module uses a logger named `fraud_detector` that outputs one JSON record per
+line. Call `fraud_detector.configure_logging()` to attach the default
+`StreamHandler`, or pass in a custom logger so applications can manage logging
+themselves. The handler is only added if none are present to avoid duplicate
+logs.
 
 ## Run tests
 
