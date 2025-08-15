@@ -6,7 +6,7 @@ import jsonschema
 import pytest
 
 import fraud_detector
-from fraud_detector import evaluate_transaction
+from fraud_detector import evaluate_transaction, configure_logging
 
 def _base_event(**overrides):
     event = {
@@ -78,3 +78,15 @@ def test_invalid_correlation_id_replaced(caplog, monkeypatch):
         evaluate_transaction(event, correlation_id="not-a-uuid")
     record = caplog.records[-1]
     assert json.loads(record.message)["correlation_id"] == new_cid
+
+
+def test_configure_logging_custom_logger():
+    custom = logging.getLogger("custom")
+    custom.handlers.clear()
+    configure_logging(custom)
+    assert fraud_detector.fraud_detector.logger is custom
+    before = len(custom.handlers)
+    configure_logging(custom)
+    assert len(custom.handlers) == before
+    custom.handlers.clear()
+    configure_logging(logging.getLogger("fraud_detector"))

@@ -1,3 +1,10 @@
+"""Simple rule-based fraud detection with JSON logging.
+
+The module exposes :func:`configure_logging` to allow applications to manage
+the logger used for JSON output. A default logger named ``fraud_detector`` is
+configured to emit one JSON record per line to ``stdout``.
+"""
+
 import json
 import logging
 import uuid
@@ -7,10 +14,38 @@ from typing import Dict, Any, Callable, Tuple, List
 import jsonschema
 
 logger = logging.getLogger("fraud_detector")
-_handler = logging.StreamHandler()
-_handler.setFormatter(logging.Formatter('%(message)s'))
-logger.addHandler(_handler)
-logger.setLevel(logging.INFO)
+
+
+def configure_logging(
+    external_logger: logging.Logger | None = None,
+    level: int = logging.INFO,
+) -> logging.Logger:
+    """Configure the module logger.
+
+    Parameters
+    ----------
+    external_logger:
+        Optional logger instance to use instead of the default one.
+    level:
+        Logging level applied to the logger.
+
+    Returns
+    -------
+    logging.Logger
+        The configured logger instance.
+    """
+    global logger
+    if external_logger is not None:
+        logger = external_logger
+    if not logger.handlers:
+        handler = logging.StreamHandler()
+        handler.setFormatter(logging.Formatter("%(message)s"))
+        logger.addHandler(handler)
+    logger.setLevel(level)
+    return logger
+
+
+configure_logging()
 
 with open(Path(__file__).with_name("eventSchema.json")) as _f:
     _EVENT_SCHEMA = json.load(_f)
