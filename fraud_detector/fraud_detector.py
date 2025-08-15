@@ -8,10 +8,11 @@ configured to emit one JSON record per line to ``stdout``.
 import json
 import logging
 import uuid
-from pathlib import Path
 from typing import Dict, Any
 
+import importlib.resources as resources
 import jsonschema
+from jsonschema import Draft202012Validator as Draft2020Validator
 
 from .rule_registry import rules_registry
 # Ensure built-in rules are registered
@@ -54,8 +55,12 @@ def configure_logging(
 
 configure_logging()
 
-with open(Path(__file__).with_name("eventSchema.json")) as _f:
-    _EVENT_SCHEMA = json.load(_f)
+try:
+    with resources.files(__package__).joinpath("eventSchema.json").open("r", encoding="utf-8") as _f:
+        _EVENT_VALIDATOR = Draft2020Validator(json.load(_f))
+except FileNotFoundError:
+    logger.error("eventSchema.json not found; event validation disabled")
+    _EVENT_VALIDATOR = None
 
 
 def _log(entry: Dict[str, Any], correlation_id: str) -> None:
@@ -79,11 +84,14 @@ def evaluate_transaction(event: Dict[str, Any], correlation_id: str | None = Non
             correlation_id = str(uuid.uuid4())
     else:
         correlation_id = str(uuid.uuid4())
-    try:
-        jsonschema.validate(event, _EVENT_SCHEMA)
-    except jsonschema.ValidationError as err:
-        _log({"event_id": event.get("event_id"), "error": err.message}, correlation_id)
-        raise
+    if _EVENT_VALIDATOR is not None:
+        try:
+            _EVENT_VALIDATOR.validate(event)
+        except jsonschema.ValidationError as err:
+            _log({"event_id": event.get("event_id"), "error": err.message}, correlation_id)
+            raise
+    else:
+        logger.error("Event schema validator unavailable; skipping validation")
 
     tx = event.get("transaction", {})
     features = event.get("features", {})
