@@ -2,8 +2,9 @@ from pathlib import Path
 import json
 import jsonschema
 import pytest
+from importlib import resources
 
-SCHEMA = json.loads(Path("eventSchema.json").read_text())
+SCHEMA = json.loads(resources.files("fraud_detector").joinpath("eventSchema.json").read_text())
 DATA_DIR = Path("tests/data")
 
 def _load_events(pattern: str):

@@ -4,6 +4,11 @@ from random import SystemRandom
 from faker import Faker
 from ulid import ULID
 
+import jsonschema
+from importlib import resources
+
+SCHEMA = json.loads(resources.files("fraud_detector").joinpath("eventSchema.json").read_text())
+
 fake = Faker()
 rand = SystemRandom()
 CURRENCIES = ["ZAR", "USD", "GBP"]
@@ -13,7 +18,7 @@ STATUS     = ["authorised", "declined", "reversed", "pending"]
 def make_event():
     now = dt.datetime.utcnow().replace(microsecond=0)
     amt = round(rand.uniform(10, 5000), 2)
-    return {
+    event = {
         "event_id": str(ULID()),
         "event_time": now.isoformat() + "Z",
         "event_type": "transaction",
@@ -54,6 +59,8 @@ def make_event():
         "pii_redacted": True,
         "consent_flags": ["fraud_scoring_v1"]
     }
+    jsonschema.validate(instance=event, schema=SCHEMA)
+    return event
 
 if __name__ == "__main__":
     import sys, gzip

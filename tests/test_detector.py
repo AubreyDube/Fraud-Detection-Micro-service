@@ -1,13 +1,9 @@
-import sys
-import pathlib
 import json
 import logging
 import uuid
 
 import jsonschema
 import pytest
-
-sys.path.append(str(pathlib.Path(__file__).resolve().parents[1]))
 
 import fraud_detector
 from fraud_detector import evaluate_transaction
@@ -77,7 +73,7 @@ def test_valid_correlation_id_used(caplog):
 def test_invalid_correlation_id_replaced(caplog, monkeypatch):
     event = _base_event()
     new_cid = "00000000-0000-0000-0000-000000000001"
-    monkeypatch.setattr("fraud_detector.uuid.uuid4", lambda: uuid.UUID(new_cid))
+    monkeypatch.setattr("fraud_detector.fraud_detector.uuid.uuid4", lambda: uuid.UUID(new_cid))
     with caplog.at_level(logging.INFO, logger="fraud_detector"):
         evaluate_transaction(event, correlation_id="not-a-uuid")
     record = caplog.records[-1]
